@@ -1,0 +1,163 @@
+SOLVER:
+  MAX_ITER: 5000000
+  TYPE: Adam
+  BASE_LR: 0.000025
+  RE_LR: 0.00005
+  GAMMA: 0.5
+  STEPS: [0]
+  # EPOCHS: [0, 19, 29]
+  EPOCHS: [0]
+DEBUG: False
+LOGDIR: ''
+DEVICE: cuda
+NUM_WORKERS: 4
+SEED_VALUE: -1
+LOSS:
+  KP_2D_W: 320.0
+  KP_3D_W: 300.0
+  SHAPE_W: 0.07
+  POSE_W: 64.0
+  VERT_W: 5.0
+  INDEX_WEIGHTS: 2.0
+  # Loss weights for surface parts. (24 Parts)
+  PART_WEIGHTS: 0.3
+  # Loss weights for UV regression.
+  POINT_REGRESSION_WEIGHTS: 0.5
+  DEPTH_WEIGHTS: 40.0
+  DEPTH_BC_WEIGHTS: 0.7
+TRAIN:
+  NUM_WORKERS: 8
+  # BATCH_SIZE: 64
+  BATCH_SIZE: 32
+  # PIN_MEMORY: True
+  PIN_MEMORY: False
+  CLIP_GRADIENT: False
+  CLIP_NORM: 4.0
+TEST:
+  BATCH_SIZE: 32
+MODEL:
+  PyMAF:
+    MAF_ON: False
+    # BACKBONE: 'res50'
+    BACKBONE: 'hr48'
+    MLP_DIM: [256, 128, 64, 5]
+    N_ITER: 3
+    AUX_SUPV_ON: True
+    # AUX_SUPV_ON: False
+    USE_MAX_MAP: True
+    MARKER: False
+    MASK: True
+    DP_HEATMAP_SIZE: 56
+    DEEP_HEATMAP_SIZE: 56
+    MASKED_PROB: 0.2
+    GRID_ALIGN:
+      USE_ATT: True
+      USE_FC: False
+      ATT_FEAT_IDX: 2
+      ATT_HEAD: 1
+      ATT_STARTS: 0
+RES_MODEL:
+  DECONV_WITH_BIAS: False
+  NUM_DECONV_LAYERS: 3
+  NUM_DECONV_FILTERS:
+  - 256
+  - 256
+  - 256
+  NUM_DECONV_KERNELS:
+  - 4
+  - 4
+  - 4
+
+POSE_RES_MODEL:
+  INIT_WEIGHTS: True
+  NAME: 'pose_resnet'
+  PRETR_SET: 'coco'   # 'none' 'imagenet' 'coco'
+  # PRETRAINED: 'data/pretrained_model/resnet50-19c8e357.pth'
+  PRETRAINED_IM: 'data/pretrained_model/resnet50-19c8e357.pth'
+  PRETRAINED_COCO: 'data/pretrained_model/pose_resnet_50_256x192.pth.tar'
+  EXTRA:
+    TARGET_TYPE: 'gaussian'
+    HEATMAP_SIZE:
+    - 48
+    - 64
+    SIGMA: 2
+    FINAL_CONV_KERNEL: 1
+    DECONV_WITH_BIAS: False
+    NUM_DECONV_LAYERS: 3
+    NUM_DECONV_FILTERS:
+    - 268
+    - 268
+    - 268
+    NUM_DECONV_KERNELS:
+    - 4
+    - 4
+    - 4
+    NUM_LAYERS: 50
+
+HR_MODEL:
+  INIT_WEIGHTS: True
+  NAME: pose_hrnet
+  PRETR_SET: 'coco'   # 'none' 'imagenet' 'coco'
+  PRETRAINED_IM: 'data/pretrained_model/hrnet_w48-imgnet-8ef0771d.pth'
+  PRETRAINED_COCO: 'data/pretrained_model/pose_hrnet_w48_256x192.pth'
+  TARGET_TYPE: gaussian
+  IMAGE_SIZE:
+  - 256
+  - 256
+  HEATMAP_SIZE:
+  - 64
+  - 64
+  SIGMA: 2
+  EXTRA:
+    PRETRAINED_LAYERS:
+    - 'conv1'
+    - 'bn1'
+    - 'conv2'
+    - 'bn2'
+    - 'layer1'
+    - 'transition1'
+    - 'stage2'
+    - 'transition2'
+    - 'stage3'
+    - 'transition3'
+    - 'stage4'
+    FINAL_CONV_KERNEL: 1
+    STAGE2:
+      NUM_MODULES: 1
+      NUM_BRANCHES: 2
+      BLOCK: BASIC
+      NUM_BLOCKS:
+      - 4
+      - 4
+      NUM_CHANNELS:
+      - 48
+      - 96
+      FUSE_METHOD: SUM
+    STAGE3:
+      NUM_MODULES: 4
+      NUM_BRANCHES: 3
+      BLOCK: BASIC
+      NUM_BLOCKS:
+      - 4
+      - 4
+      - 4
+      NUM_CHANNELS:
+      - 48
+      - 96
+      - 192
+      FUSE_METHOD: SUM
+    STAGE4:
+      NUM_MODULES: 3
+      NUM_BRANCHES: 4
+      BLOCK: BASIC
+      NUM_BLOCKS:
+      - 4
+      - 4
+      - 4
+      - 4
+      NUM_CHANNELS:
+      - 48
+      - 96
+      - 192
+      - 384
+      FUSE_METHOD: SUM
